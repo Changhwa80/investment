@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📈 일일 주식 분석 리포트 — 2026년 03월 18일 (Wednesday)</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --buy: #059669;
+      --buy-bg: #d1fae5;
+      --hold: #d97706;
+      --hold-bg: #fef3c7;
+      --sell: #dc2626;
+      --sell-bg: #fee2e2;
+      --accent: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
+      color: white;
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .header h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; letter-spacing: -.5px; }
+    .header .meta { margin-top: 8px; opacity: .8; font-size: .9rem; }
+
+    /* Layout */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    section { margin-top: 32px; }
+    section h2 {
+      font-size: 1.1rem; font-weight: 700; color: var(--text);
+      margin-bottom: 14px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Stat cards */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 24px; }
+    .stat-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 18px 16px; text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .stat-num { font-size: 2rem; font-weight: 800; line-height: 1.1; }
+    .stat-card .stat-label { font-size: .78rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-buy   .stat-num { color: var(--buy); }
+    .stat-hold  .stat-num { color: var(--hold); }
+    .stat-sell  .stat-num { color: var(--sell); }
+    .stat-total .stat-num { color: var(--accent); }
+
+    /* Badges */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: .75rem; font-weight: 700; letter-spacing: .03em;
+    }
+    .badge-buy  { background: var(--buy-bg);  color: var(--buy);  }
+    .badge-hold { background: var(--hold-bg); color: var(--hold); }
+    .badge-sell { background: var(--sell-bg); color: var(--sell); }
+    .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
+    .risk-high { background: #fee2e2; color: #dc2626; }
+    .risk-mid  { background: #fef3c7; color: #d97706; }
+    .risk-low  { background: #d1fae5; color: #059669; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: .87rem; }
+    thead tr { background: #1e3a5f; color: white; }
+    thead th { padding: 12px 14px; text-align: left; font-weight: 600; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    td { padding: 11px 14px; vertical-align: middle; }
+    .ticker-tag {
+      display: inline-block; background: #eff6ff; color: var(--accent-dark);
+      padding: 2px 8px; border-radius: 6px; font-size: .78rem; font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .ticker-tag.small { font-size: .72rem; padding: 1px 6px; }
+    .name-cell { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .price { font-weight: 600; font-family: 'SF Mono', monospace; font-size: .85rem; }
+    .entry-price { font-size: .82rem; color: var(--accent-dark); }
+    .positive { color: var(--buy); font-weight: 600; }
+    .negative { color: var(--sell); font-weight: 600; }
+
+    /* Bar chart */
+    .chart-container {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 20px 24px; box-shadow: var(--shadow);
+    }
+    .chart-row { display: flex; align-items: center; margin-bottom: 10px; gap: 12px; }
+    .chart-label { width: 100px; flex-shrink: 0; }
+    .chart-bar-area { flex: 1; }
+    .bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .bar {
+      height: 22px; border-radius: 4px; min-width: 4px;
+      transition: width .4s ease;
+    }
+    .bar-pos { background: linear-gradient(90deg, #059669, #34d399); }
+    .bar-neg { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .bar-label { font-size: .82rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .bar-na { font-size: .8rem; color: var(--text-muted); }
+
+    /* Analysis cards */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .analysis-card .card-header {
+      padding: 14px 18px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    }
+    .card-name { font-size: .82rem; color: var(--text-muted); margin-top: 4px; }
+    .card-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .card-body { padding: 16px 18px; }
+    .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .price-item { text-align: center; }
+    .price-label { display: block; font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .price-value { display: block; font-weight: 700; font-size: .9rem; font-family: 'SF Mono', monospace; }
+    .price-value.highlight { color: var(--buy); }
+    .price-value.entry { color: var(--accent-dark); font-size: .82rem; }
+    .rationale { font-size: .85rem; color: var(--text); line-height: 1.65; margin-bottom: 10px; }
+    .risk-note {
+      font-size: .8rem; color: #92400e; background: #fef3c7;
+      padding: 8px 12px; border-radius: 8px; line-height: 1.5;
+    }
+
+    /* Group summaries */
+    .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .group-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow);
+      border-left: 4px solid var(--accent);
+    }
+    .group-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
+    .group-card p { font-size: .85rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* Takeaways */
+    .takeaways {
+      background: linear-gradient(135deg, #1e3a5f, #2d6a9f);
+      border-radius: var(--radius); padding: 24px 28px;
+      box-shadow: var(--shadow);
+    }
+    .takeaways h2 { color: white !important; border-color: rgba(255,255,255,.2) !important; }
+    .takeaways ul { list-style: none; }
+    .takeaways li {
+      display: flex; align-items: flex-start; gap: 12px;
+      color: rgba(255,255,255,.92); font-size: .9rem; padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .takeaways li:last-child { border-bottom: none; }
+    .takeaways .icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* Footer */
+    .footer {
+      text-align: center; margin-top: 40px;
+      font-size: .78rem; color: var(--text-muted);
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .price-grid { grid-template-columns: 1fr 1fr; }
+      .price-grid .price-item:last-child { grid-column: 1 / -1; }
+      .chart-label { width: 70px; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📈 글로벌 주식 &amp; ETF 일일 분석 리포트</h1>
+  <div class="meta">2026년 03월 18일 (Wednesday) &nbsp;·&nbsp; 생성: 2026-03-18 03:08:16 &nbsp;·&nbsp; Claude AI 분석</div>
+</div>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card stat-total">
+      <div class="stat-num">9</div>
+      <div class="stat-label">추적 종목</div>
+    </div>
+    <div class="stat-card stat-buy">
+      <div class="stat-num">5</div>
+      <div class="stat-label">매수 추천</div>
+    </div>
+    <div class="stat-card stat-hold">
+      <div class="stat-num">3</div>
+      <div class="stat-label">보유 / 관망</div>
+    </div>
+    <div class="stat-card stat-sell">
+      <div class="stat-num">1</div>
+      <div class="stat-label">매도 / 비중축소</div>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <section>
+    <h2>📊 종목 요약</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>티커</th>
+            <th>종목명</th>
+            <th>의견</th>
+            <th>현재가</th>
+            <th>목표가</th>
+            <th>매수 타이밍</th>
+            <th>5일 수익률</th>
+            <th>위험도</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td><span class="ticker-tag">005930.KS</span></td>
+          <td class="name-cell">Samsung Electronics Co., Ltd.</td>
+          <td><span class="badge badge-buy">매수 BUY</span></td>
+          <td class="price">₩205,000</td>
+          <td class="price">₩230,000~₩240,000</td>
+          <td class="entry-price">₩195,000~₩200,000 분할매수</td>
+          <td class="positive">+9.23%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">000660.KS</span></td>
+          <td class="name-cell">SK hynix Inc.</td>
+          <td><span class="badge badge-buy">매수 BUY</span></td>
+          <td class="price">₩1,010,000</td>
+          <td class="price">₩1,150,000~₩1,250,000</td>
+          <td class="entry-price">₩950,000~₩980,000 분할매수</td>
+          <td class="positive">+8.60%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">NVDA</span></td>
+          <td class="name-cell">NVIDIA Corporation</td>
+          <td><span class="badge badge-buy">매수 BUY</span></td>
+          <td class="price">$181.93</td>
+          <td class="price">$250~$270</td>
+          <td class="entry-price">$170~$175 분할매수</td>
+          <td class="negative">-2.20%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">AMD</span></td>
+          <td class="name-cell">Advanced Micro Devices, Inc.</td>
+          <td><span class="badge badge-hold">보유 HOLD</span></td>
+          <td class="price">$196.31</td>
+          <td class="price">$250~$290</td>
+          <td class="entry-price">$180~$185 신규진입 고려</td>
+          <td class="negative">-4.16%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">AVGO</span></td>
+          <td class="name-cell">Broadcom Inc.</td>
+          <td><span class="badge badge-buy">매수 BUY</span></td>
+          <td class="price">$321.31</td>
+          <td class="price">$420~$470</td>
+          <td class="entry-price">$300~$310 분할매수</td>
+          <td class="negative">-5.93%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">TSLA</span></td>
+          <td class="name-cell">Tesla, Inc.</td>
+          <td><span class="badge badge-hold">보유 HOLD</span></td>
+          <td class="price">$399.27</td>
+          <td class="price">$420~$450</td>
+          <td class="entry-price">$350~$370 신규진입 고려</td>
+          <td class="negative">-2.10%</td>
+          <td><span class="risk-badge risk-high">상</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">UFO</span></td>
+          <td class="name-cell">Procure Space ETF</td>
+          <td><span class="badge badge-buy">매수 BUY</span></td>
+          <td class="price">$46.78</td>
+          <td class="price">상승 예상</td>
+          <td class="entry-price">$45~$46 분할매수</td>
+          <td class="positive">+3.02%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">ARKX</span></td>
+          <td class="name-cell">ARK Space & Defense Innovation ETF</td>
+          <td><span class="badge badge-hold">보유 HOLD</span></td>
+          <td class="price">$32.04</td>
+          <td class="price">횡보 예상</td>
+          <td class="entry-price">$30~$31 신규진입 고려</td>
+          <td class="positive">+1.26%</td>
+          <td><span class="risk-badge risk-mid">중</span></td>
+        </tr>
+        <tr>
+          <td><span class="ticker-tag">XOVR</span></td>
+          <td class="name-cell">ERShares Private-Public Crossover ETF</td>
+          <td><span class="badge badge-sell">매도 SELL</span></td>
+          <td class="price">$17.50</td>
+          <td class="price">하락 예상</td>
+          <td class="entry-price">진입 비권장</td>
+          <td class="negative">-0.62%</td>
+          <td><span class="risk-badge risk-high">상</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Upside chart -->
+  <section>
+    <h2>📐 상승 여력 (애널리스트 목표가 기준)</h2>
+    <div class="chart-container">
+      
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">005930.KS</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:32.4%"></div><span class="bar-label">+15.5%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">000660.KS</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:50.7%"></div><span class="bar-label">+24.3%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">NVDA</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:98.3%"></div><span class="bar-label">+47.1%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">AMD</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:100.0%"></div><span class="bar-label">+47.9%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">AVGO</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:95.2%"></div><span class="bar-label">+45.6%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">TSLA</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><div class="bar bar-pos" style="width:11.7%"></div><span class="bar-label">+5.6%</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">UFO</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><span class="bar-na">N/A (애널리스트 목표가 없음)</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">ARKX</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><span class="bar-na">N/A (애널리스트 목표가 없음)</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">
+          <span class="ticker-tag small">XOVR</span>
+        </div>
+        <div class="chart-bar-area">
+          <div class="bar-wrap"><span class="bar-na">N/A (애널리스트 목표가 없음)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis cards -->
+  <section>
+    <h2>🔍 종목별 상세 분석</h2>
+    <div class="cards-grid">
+      
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">005930.KS</span>
+            <span class="card-name">Samsung Electronics Co., Ltd.</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-buy">매수 BUY</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">₩205,000</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">₩230,000~₩240,000</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">₩195,000~₩200,000 분할매수</span>
+            </div>
+          </div>
+          <div class="rationale">5일간 +9.23% 강한 반등으로 바닥 확인. 현재가 대비 애널리스트 목표가 15% 업사이드 존재. 52주 저점 대비 4배 상승했으나 고점 대비 여전히 8% 할인 구간.</div>
+          <div class="risk-note">⚠️ 메모리 업황 회복 지연 및 파운드리 경쟁 심화</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">000660.KS</span>
+            <span class="card-name">SK hynix Inc.</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-buy">매수 BUY</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">₩1,010,000</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">₩1,150,000~₩1,250,000</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">₩950,000~₩980,000 분할매수</span>
+            </div>
+          </div>
+          <div class="rationale">AI용 HBM 시장 선도 기업으로 5일간 +8.60% 강세. 애널리스트 목표가 대비 24% 업사이드. 52주 고점 대비 8% 할인된 가격으로 매력적 진입 구간.</div>
+          <div class="risk-note">⚠️ HBM 경쟁 심화 및 NVIDIA 의존도</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">NVDA</span>
+            <span class="card-name">NVIDIA Corporation</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-buy">매수 BUY</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$181.93</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">$250~$270</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$170~$175 분할매수</span>
+            </div>
+          </div>
+          <div class="rationale">AI 인프라 투자 확대의 핵심 수혜주. 5일간 -2.20% 조정으로 단기 매수 기회 형성. 애널리스트 목표가 $267 대비 47% 업사이드 잠재력.</div>
+          <div class="risk-note">⚠️ 중국 수출규제 강화 및 높은 밸류에이션 부담</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">AMD</span>
+            <span class="card-name">Advanced Micro Devices, Inc.</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-hold">보유 HOLD</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$196.31</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">$250~$290</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$180~$185 신규진입 고려</span>
+            </div>
+          </div>
+          <div class="rationale">PER 75.2배로 고평가 구간이나 AI GPU 시장 확대 수혜 기대. 5일간 -4.16% 조정 중이며, 52주 고점 대비 26% 할인. 신규 진입보다 기존 보유자 홀딩 권장.</div>
+          <div class="risk-note">⚠️ NVIDIA 대비 AI 가속기 시장점유율 열위</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">AVGO</span>
+            <span class="card-name">Broadcom Inc.</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-buy">매수 BUY</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$321.31</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">$420~$470</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$300~$310 분할매수</span>
+            </div>
+          </div>
+          <div class="rationale">AI 네트워킹·커스텀 칩 수요 급증 수혜. 5일간 -5.93% 큰 폭 조정으로 매수 기회. 애널리스트 목표가 대비 46% 업사이드로 가장 매력적인 밸류에이션.</div>
+          <div class="risk-note">⚠️ VMware 인수 통합 리스크 및 경기 민감도</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">TSLA</span>
+            <span class="card-name">Tesla, Inc.</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-hold">보유 HOLD</span>
+            <span class="risk-badge risk-high">위험도 상</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$399.27</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">$420~$450</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$350~$370 신규진입 고려</span>
+            </div>
+          </div>
+          <div class="rationale">로보택시·FSD·에너지 사업 성장 기대감 반영된 주가. 현재가가 애널리스트 목표가에 근접해 추가 상승 여력 제한적. 높은 변동성으로 신규 매수는 신중해야 함.</div>
+          <div class="risk-note">⚠️ PER 369배 극단적 고평가, 머스크 리스크, EV 경쟁 심화</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">UFO</span>
+            <span class="card-name">Procure Space ETF</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-buy">매수 BUY</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$46.78</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">상승 예상</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$45~$46 분할매수</span>
+            </div>
+          </div>
+          <div class="rationale">5일간 +3.02% 상승세로 52주 고점 근접. 우주 상업화 가속화와 SpaceX IPO 기대감 수혜. PER 21.2배로 우주 ETF 중 가장 합리적 밸류에이션.</div>
+          <div class="risk-note">⚠️ 우주산업 상업화 지연 및 낮은 유동성</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">ARKX</span>
+            <span class="card-name">ARK Space & Defense Innovation ETF</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-hold">보유 HOLD</span>
+            <span class="risk-badge risk-mid">위험도 중</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$32.04</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">횡보 예상</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">$30~$31 신규진입 고려</span>
+            </div>
+          </div>
+          <div class="rationale">5일간 +1.26% 소폭 상승. PER 35.1배로 UFO 대비 프리미엄 존재. 52주 고점 대비 10% 할인 구간이나 모멘텀 약화로 관망 권장.</div>
+          <div class="risk-note">⚠️ ARK 특유의 고변동성 및 테마 집중 리스크</div>
+        </div>
+      </div>
+      <div class="card analysis-card">
+        <div class="card-header">
+          <div>
+            <span class="ticker-tag">XOVR</span>
+            <span class="card-name">ERShares Private-Public Crossover ETF</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-sell">매도 SELL</span>
+            <span class="risk-badge risk-high">위험도 상</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">현재가</span>
+              <span class="price-value">$17.50</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">목표가</span>
+              <span class="price-value highlight">하락 예상</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">매수 타이밍</span>
+              <span class="price-value entry">진입 비권장</span>
+            </div>
+          </div>
+          <div class="rationale">SpaceX 등 비상장 기업 익스포저 ETF이나 5일간 -0.62% 약세. 52주 고점 대비 20% 하락했으며, 비상장 자산 평가 불투명성으로 리스크 대비 수익률 불리.</div>
+          <div class="risk-note">⚠️ 비상장 기업 유동성 리스크 및 밸류에이션 불확실성</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Group summaries -->
+  <section>
+    <h2>🗂️ 그룹별 총평</h2>
+    <div class="group-grid">
+      
+      <div class="group-card">
+        <h3>🇰🇷 한국 반도체</h3>
+        <p>삼성전자·SK하이닉스 모두 5일간 8~9% 강한 반등세로 HBM·메모리 업황 회복 기대감 반영. AI 수요 확대와 재고 정상화 진행 중이며, 두 종목 모두 애널리스트 목표가 대비 15~24% 업사이드로 적극 매수 구간 판단.</p>
+      </div>
+      <div class="group-card">
+        <h3>🇺🇸 미국 AI·EV</h3>
+        <p>NVDA·AVGO는 5일 조정으로 매수 기회 형성, AMD는 중립적 보유 권장. TSLA는 PER 369배 극단적 고평가로 신규 진입 신중해야 하며, AI 인프라 투자 수혜주 중심 선별 접근 필요.</p>
+      </div>
+      <div class="group-card">
+        <h3>🚀 우주 ETF</h3>
+        <p>UFO가 가장 합리적 밸류에이션과 강한 모멘텀 보유, 우주 상업화 테마 대표 ETF로 매수 추천. ARKX는 관망, XOVR는 비상장 자산 리스크로 비중 축소 권장.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key takeaways -->
+  <section>
+    <div class="takeaways">
+      <h2>💡 핵심 요약</h2>
+      <ul>
+        <li><span class="icon">🥇</span>최우선 매수: AVGO(46% 업사이드, 최대 조정폭), SK하이닉스(HBM 선도), NVDA(AI 핵심)</li><li><span class="icon">🥈</span>보유/관망: 삼성전자(반등 확인 후 추가매수), AMD·TSLA·ARKX(고평가 부담으로 홀딩)</li><li><span class="icon">🥉</span>비중축소/매도: XOVR(비상장 리스크, 약세 전환으로 익절 또는 손절 권장)</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer">
+    <p>⚠️ 본 리포트는 정보 제공 목적이며 투자 권유가 아닙니다. 투자 결정은 본인 책임하에 이루어져야 합니다.</p>
+    <p style="margin-top:6px">생성: 2026-03-18 03:08:16 &nbsp;|&nbsp; Powered by Claude AI &amp; yfinance</p>
+  </div>
+
+</div>
+</body>
+</html>
