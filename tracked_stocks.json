@@ -1,0 +1,34 @@
+{
+  "stock_groups": {
+    "🇰🇷 한국 반도체": [
+      "005930.KS",
+      "000660.KS"
+    ],
+    "🇺🇸 미국 AI/반도체·EV": [
+      "NVDA",
+      "AMD",
+      "AVGO",
+      "TSLA"
+    ],
+    "🚀 우주/SpaceX 관련 ETF": [
+      "UFO",
+      "ARKX",
+      "XOVR"
+    ],
+    "📌 추가 종목": [
+      "WMT"
+    ]
+  },
+  "korean_names": {
+    "005930.KS": "삼성전자",
+    "000660.KS": "SK하이닉스",
+    "NVDA": "엔비디아",
+    "AMD": "AMD",
+    "AVGO": "브로드컴",
+    "TSLA": "테슬라",
+    "UFO": "UFO (우주ETF)",
+    "ARKX": "ARKX (우주ETF)",
+    "XOVR": "XOVR (크로스오버)",
+    "WMT": "WMT"
+  }
+}
