@@ -29,7 +29,7 @@ jobs:
 
       # 3. 의존성 설치
       - name: 📦 패키지 설치
-        run: pip install yfinance anthropic
+        run: pip install -r requirements.txt
 
       # 4. 주식 분석 실행
       #    - echo "done" 은 스크립트 마지막의 포트폴리오 메뉴 입력을 자동으로 종료
