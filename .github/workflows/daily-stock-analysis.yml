@@ -41,14 +41,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "done" | python main.py
 
-      # 5. tracked_stocks.json 변경분 커밋 (종목 목록이 바뀐 경우)
-      #    git pull --rebase: Step 4에서 upload_to_github()가 API로 daily_report.html을
-      #    직접 커밋하므로 원격이 1 커밋 앞서 있음 → rebase 후 push
-      - name: 💾 tracked_stocks.json 동기화 커밋
+      # 5. daily_report.html + tracked_stocks.json 커밋·푸시
+      #    fetch → reset --hard: 원격 최신 상태로 맞춘 뒤 우리 파일만 추가 → 충돌 없음
+      - name: 💾 리포트 및 종목 목록 커밋
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tracked_stocks.json
-          git diff --staged --quiet || git commit -m "chore: tracked_stocks.json 자동 동기화"
-          git pull --rebase origin main
+          git fetch origin main
+          git reset --hard origin/main
+          git add daily_report.html tracked_stocks.json
+          git diff --staged --quiet || git commit -m "daily update"
           git push origin main
