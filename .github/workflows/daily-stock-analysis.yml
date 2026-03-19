@@ -1,0 +1,50 @@
+name: 📊 일일 주식 분석 리포트
+
+on:
+  schedule:
+    # 매일 오전 9:00 KST (= UTC 00:00) 자동 실행
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # 수동 실행 버튼도 제공 (GitHub Actions 탭에서 "Run workflow" 클릭)
+
+permissions:
+  contents: write   # daily_report.html 커밋·푸시 권한
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15   # Claude AI 분석 포함 최대 15분
+
+    steps:
+      # 1. 저장소 체크아웃
+      - name: 📥 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      # 2. Python 3.11 설정
+      - name: 🐍 Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # 3. 의존성 설치
+      - name: 📦 패키지 설치
+        run: pip install yfinance anthropic
+
+      # 4. 주식 분석 실행
+      #    - echo "done" 은 스크립트 마지막의 포트폴리오 메뉴 입력을 자동으로 종료
+      #    - upload_to_github() 함수가 GITHUB_TOKEN 을 이용해 daily_report.html 을 자동 커밋
+      - name: 🔍 주식 분석 및 리포트 생성
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "done" | python main.py
+
+      # 5. tracked_stocks.json 변경분 커밋 (종목 목록이 바뀐 경우)
+      - name: 💾 tracked_stocks.json 동기화 커밋
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tracked_stocks.json
+          git diff --staged --quiet || git commit -m "chore: tracked_stocks.json 자동 동기화"
+          git push
