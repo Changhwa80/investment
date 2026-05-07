@@ -1,9 +1,9 @@
 name: 📊 일일 주식 분석 리포트
 
 on:
-  schedule:
-    # 매일 오전 9:00 KST (= UTC 00:00) 자동 실행
-    - cron: '0 0 * * *'
+  # schedule:
+  #   # 매일 오전 9:00 KST (= UTC 00:00) 자동 실행
+  #   - cron: '0 0 * * *'
   workflow_dispatch:
     # 수동 실행 버튼도 제공 (GitHub Actions 탭에서 "Run workflow" 클릭)
 
